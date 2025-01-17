@@ -1,5 +1,30 @@
 #!/bin/bash
 set -e  # Exit the script on any error
+
+# Update packages
+echo "Setting up Django application..."
+sudo yum update -y
+sudo yum install -y git
+sudo yum install -y docker
+# Start and enable Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add EC2 user to Docker group
+sudo usermod -aG docker ec2-user
+# Commenting out 'newgrp docker' to avoid script termination
+# Logout and log back in for changes to take effect
+
+# Clone your Django application repository
+if [ ! -d "/home/ec2-user/proberservice" ]; then
+  git clone https://github.com/prasad51k/proberservice.git /home/ec2-user/proberservice
+else
+  echo "Repository already exists. Pulling latest changes..."
+  cd /home/ec2-user/proberservice
+  git pull
+fi
+cd /home/ec2-user/proberservice
+
 # Build the Docker image
 docker build -t proberservice1 .
 
