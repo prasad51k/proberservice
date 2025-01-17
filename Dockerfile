@@ -1,24 +1,27 @@
-# Use the official Python base image
+# Use a lightweight Python base image
 FROM python:3.12-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements.txt file
+# Install required system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the requirements file
 COPY requirements.txt /app/
 
-# Install the required Python packages
+# Install Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy the application code into the container
+# Copy the application code
 COPY . /app/
 
-# Expose the port the app runs on (default for Django is 8000)
+# Expose the application port (adjust as per your app's configuration)
 EXPOSE 8000
 
-# Run the Django application
+# Set the default command
 CMD ["gunicorn", "proberservice.wsgi:application", "--bind", "0.0.0.0:8000"]
